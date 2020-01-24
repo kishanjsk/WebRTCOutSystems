@@ -210,7 +210,7 @@ this.Session.install = function() {
   if (!window.plugins) {
     window.plugins = {};
   }
-  window.plugins.phoneRTCPlugin = new Session();
-  return window.plugins.phoneRTCPlugin;
+  window.plugins.Session = new Session();
+  return window.plugins.Session;
 };
 cordova.addConstructor(this.Session.install);
