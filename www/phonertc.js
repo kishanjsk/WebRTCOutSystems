@@ -1,4 +1,4 @@
-var exec = require('cordova/exec');
+var exec = require("cordova/exec");
 var videoViewConfig;
 
 function createUUID() {
@@ -6,31 +6,33 @@ function createUUID() {
   var s = [];
   var hexDigits = "0123456789abcdef";
   for (var i = 0; i < 36; i++) {
-      s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+    s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
   }
-  s[14] = "4";  // bits 12-15 of the time_hi_and_version field to 0010
-  s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1);  // bits 6-7 of the clock_seq_hi_and_reserved to 01
+  s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
+  s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
   s[8] = s[13] = s[18] = s[23] = "-";
 
   var uuid = s.join("");
   return uuid;
 }
 
-function Session(config) { 
+function Session(config) {
   // make sure that the config object is valid
-  if (typeof config !== 'object') {
+  if (typeof config !== "object") {
     throw {
-      name: 'PhoneRTC Error',
-      message: 'The first argument must be an object.'
+      name: "PhoneRTC Error",
+      message: "The first argument must be an object."
     };
   }
 
-  if (typeof config.isInitiator === 'undefined' ||
-      typeof config.turn === 'undefined' ||
-      typeof config.streams === 'undefined') {
+  if (
+    typeof config.isInitiator === "undefined" ||
+    typeof config.turn === "undefined" ||
+    typeof config.streams === "undefined"
+  ) {
     throw {
-      name: 'PhoneRTC Error',
-      message: 'isInitiator, turn and streams are required parameters.'
+      name: "PhoneRTC Error",
+      message: "isInitiator, turn and streams are required parameters."
     };
   }
 
@@ -40,10 +42,14 @@ function Session(config) {
   self.sessionKey = createUUID();
 
   // make all config properties accessible from this object
-  Object.keys(config).forEach(function (prop) {
+  Object.keys(config).forEach(function(prop) {
     Object.defineProperty(self, prop, {
-      get: function () { return self.config[prop]; },
-      set: function (value) { self.config[prop] = value; }
+      get: function() {
+        return self.config[prop];
+      },
+      set: function(value) {
+        self.config[prop] = value;
+      }
     });
   });
 
@@ -53,30 +59,33 @@ function Session(config) {
     }
 
     var args = Array.prototype.slice.call(arguments, 1);
-    self.events[eventName].forEach(function (callback) {
+    self.events[eventName].forEach(function(callback) {
       callback.apply(self, args);
     });
   }
 
   function onSendMessage(data) {
-    if (data.type === '__answered') {
-      callEvent('answer');
-    } else if (data.type === '__disconnected') {
-      callEvent('disconnect');
+    if (data.type === "__answered") {
+      callEvent("answer");
+    } else if (data.type === "__disconnected") {
+      callEvent("disconnect");
     } else {
-      callEvent('sendMessage', data);
+      callEvent("sendMessage", data);
     }
   }
 
-  exec(onSendMessage, null, 'PhoneRTCPlugin', 'createSessionObject', [self.sessionKey, config]);
-};
+  exec(onSendMessage, null, "PhoneRTCPlugin", "createSessionObject", [
+    self.sessionKey,
+    config
+  ]);
+}
 
-Session.prototype.on = function (eventName, fn) {
+Session.prototype.on = function(eventName, fn) {
   // make sure that the second argument is a function
-  if (typeof fn !== 'function') {
+  if (typeof fn !== "function") {
     throw {
-      name: 'PhoneRTC Error',
-      message: 'The second argument must be a function.'
+      name: "PhoneRTC Error",
+      message: "The second argument must be a function."
     };
   }
 
@@ -88,8 +97,8 @@ Session.prototype.on = function (eventName, fn) {
     for (var i = 0, len = this.events[eventName].length; i < len; i++) {
       if (this.events[eventName][i] === fn) {
         throw {
-          name: 'PhoneRTC Error',
-          message: 'This callback function was already added.'
+          name: "PhoneRTC Error",
+          message: "This callback function was already added."
         };
       }
     }
@@ -99,12 +108,12 @@ Session.prototype.on = function (eventName, fn) {
   this.events[eventName].push(fn);
 };
 
-Session.prototype.off = function (eventName, fn) {
+Session.prototype.off = function(eventName, fn) {
   // make sure that the second argument is a function
-  if (typeof fn !== 'function') {
+  if (typeof fn !== "function") {
     throw {
-      name: 'PhoneRTC Error',
-      message: 'The second argument must be a function.'
+      name: "PhoneRTC Error",
+      message: "The second argument must be a function."
     };
   }
 
@@ -119,35 +128,43 @@ Session.prototype.off = function (eventName, fn) {
     }
   }
 
-  indexesToRemove.forEach(function (index) {
+  indexesToRemove.forEach(function(index) {
     this.events.splice(index, 1);
-  })
+  });
 };
 
-Session.prototype.call = function (success, error) {
-  exec(success, error, 'PhoneRTCPlugin', 'call', [{
-    sessionKey: this.sessionKey
-  }]);
+Session.prototype.call = function(success, error) {
+  exec(success, error, "PhoneRTCPlugin", "call", [
+    {
+      sessionKey: this.sessionKey
+    }
+  ]);
 };
 
-Session.prototype.receiveMessage = function (data) {
-  exec(null, null, 'PhoneRTCPlugin', 'receiveMessage', [{
-    sessionKey: this.sessionKey,
-    message: JSON.stringify(data)
-  }]);
+Session.prototype.receiveMessage = function(data) {
+  exec(null, null, "PhoneRTCPlugin", "receiveMessage", [
+    {
+      sessionKey: this.sessionKey,
+      message: JSON.stringify(data)
+    }
+  ]);
 };
 
-Session.prototype.renegotiate = function () {
-  exec(null, null, 'PhoneRTCPlugin', 'renegotiate', [{
-    sessionKey: this.sessionKey,
-    config: this.config
-  }]);
+Session.prototype.renegotiate = function() {
+  exec(null, null, "PhoneRTCPlugin", "renegotiate", [
+    {
+      sessionKey: this.sessionKey,
+      config: this.config
+    }
+  ]);
 };
 
-Session.prototype.close = function () {
-  exec(null, null, 'PhoneRTCPlugin', 'disconnect', [{ 
-    sessionKey: this.sessionKey
-  }]);
+Session.prototype.close = function() {
+  exec(null, null, "PhoneRTCPlugin", "disconnect", [
+    {
+      sessionKey: this.sessionKey
+    }
+  ]);
 };
 
 exports.Session = Session;
@@ -155,9 +172,12 @@ exports.Session = Session;
 function getLayoutParams(videoElement) {
   var boundingRect = videoElement.getBoundingClientRect();
 
-  if (cordova.platformId === 'android') {
+  if (cordova.platformId === "android") {
     return {
-      position: [boundingRect.left + window.scrollX, boundingRect.top + window.scrollY],
+      position: [
+        boundingRect.left + window.scrollX,
+        boundingRect.top + window.scrollY
+      ],
       size: [boundingRect.width, boundingRect.height]
     };
   }
@@ -180,14 +200,14 @@ function setVideoView(config) {
 
   config.devicePixelRatio = window.devicePixelRatio || 2;
 
-  exec(null, null, 'PhoneRTCPlugin', 'setVideoView', [config]);
+  exec(null, null, "PhoneRTCPlugin", "setVideoView", [config]);
 
   if (container) {
     config.container = container;
   }
-};
+}
 
-document.addEventListener('touchmove', function () {
+document.addEventListener("touchmove", function() {
   if (videoViewConfig) {
     setVideoView(videoViewConfig);
   }
@@ -195,26 +215,26 @@ document.addEventListener('touchmove', function () {
 
 exports.setVideoView = setVideoView;
 
-exports.hideVideoView = function () {
-  exec(null, null, 'PhoneRTCPlugin', 'hideVideoView', []);
+exports.hideVideoView = function() {
+  exec(null, null, "PhoneRTCPlugin", "hideVideoView", []);
 };
 
-exports.showVideoView = function () {
-  exec(null, null, 'PhoneRTCPlugin', 'showVideoView', []);
+exports.showVideoView = function() {
+  exec(null, null, "PhoneRTCPlugin", "showVideoView", []);
 };
 
-exports.checkPermissions = function (success, fail) {
-  exec(success, fail, 'PhoneRTCPlugin', 'checkPermissions', []);
+exports.checkPermissions = function(success, fail) {
+  exec(success, fail, "PhoneRTCPlugin", "checkPermissions", []);
 };
+
 exports.install = function() {
-  console.log("In INstall")
+  console.log("In INstall");
   if (!window.plugins) {
     window.plugins = {};
   }
   window.plugins.PhoneRTCPlugin = new Session();
   return window.plugins.PhoneRTCPlugin;
-
-
 };
-  console.log("addConstructor")
-  cordova.addConstructor(exports.install);
+
+console.log("addConstructor");
+cordova.addConstructor(exports.install);
