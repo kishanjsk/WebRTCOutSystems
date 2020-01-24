@@ -206,11 +206,11 @@ exports.showVideoView = function () {
 exports.checkPermissions = function (success, fail) {
   exec(success, fail, 'PhoneRTCPlugin', 'checkPermissions', []);
 };
-this.Session.install = function() {
+Session.install = function() {
   if (!window.plugins) {
     window.plugins = {};
   }
   window.plugins.phoneRTCPlugin = new Session();
   return window.plugins.phoneRTCPlugin;
 };
-cordova.addConstructor(this.Session.install);
+cordova.addConstructor(Session.install);
