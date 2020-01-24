@@ -227,14 +227,14 @@ exports.checkPermissions = function(success, fail) {
   exec(success, fail, "PhoneRTCPlugin", "checkPermissions", []);
 };
 
-exports.install = function() {
-  console.log("In INstall");
-  if (!window.plugins) {
-    window.plugins = {};
-  }
-  window.plugins.PhoneRTCPlugin = new Session();
-  return window.plugins.PhoneRTCPlugin;
-};
-
-console.log("addConstructor");
-cordova.addConstructor(exports.install);
+// exports.install = function() {
+//   console.log("In INstall");
+  
+//   return window.plugins.PhoneRTCPlugin;
+// };
+if (!window.plugins) {
+  window.plugins = {};
+}
+window.plugins.PhoneRTCPlugin = new Session();
+// console.log("addConstructor");
+// cordova.addConstructor(exports.install);
